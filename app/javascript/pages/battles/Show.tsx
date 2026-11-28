@@ -81,9 +81,9 @@ export default function ShowBattle() {
         </section>
 
         {live && (
-          <div className="mt-6 max-w-xl">
-            <RewardsPanel rewards={battle.rewards} stages={battle.stages_total} />
-          </div>
+          <p className="mt-4 max-w-xl">
+            Clear all {battle.stages_total} for <strong>+{battle.rewards.defeat_xp} XP and +{battle.rewards.defeat_coins} coins</strong>.
+          </p>
         )}
 
         <section className="mt-8 max-w-xl" aria-label="Stages">
@@ -117,6 +117,12 @@ export default function ShowBattle() {
             ))}
           </ol>
         </section>
+
+        {live && (
+          <div className="mt-8 max-w-xl">
+            <RewardsPanel rewards={battle.rewards} stages={battle.stages_total} />
+          </div>
+        )}
 
         <section className="mt-8 max-w-xl" aria-label="Before and after">
           <h2>Before and after</h2>

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Head, router, usePage } from "@inertiajs/react"
 import { AppShell } from "@/components/AppShell"
 import { PageHeader } from "@/components/PageHeader"
@@ -19,6 +19,7 @@ export default function SanctuaryShow() {
   const coins = props.player?.coins ?? 0
   const [roomKey, setRoomKey] = useState("living_room")
   const [preview, setPreview] = useState<Decoration | null>(null)
+  const cottageRef = useRef<HTMLDivElement>(null)
 
   const room = sanctuary.rooms.find((r) => r.key === roomKey)!
   const roomName = (key: string) => sanctuary.rooms.find((r) => r.key === key)?.name ?? key
@@ -26,6 +27,9 @@ export default function SanctuaryShow() {
   const placed = sanctuary.placements[roomKey] ?? {}
   const fits = (item: Decoration) => !item.rooms || item.rooms.includes(roomKey)
   const shown = preview && fits(preview) ? { ...placed, [preview.slot]: preview.key } : placed
+
+  // The cheapest thing not yet owned: always something small to aim for.
+  const nextTreat = [...sanctuary.items].filter((i) => !i.owned).sort((a, b) => a.price - b.price)[0]
 
   const post = (path: string, data: Record<string, string> = {}) =>
     router.post(path, data, { preserveScroll: true })
@@ -66,8 +70,36 @@ export default function SanctuaryShow() {
           </p>
         )}
 
+        {nextTreat && (
+          <section className="mt-6 max-w-xl rounded-2xl border border-hairline bg-accent-faded p-4" aria-label="Your next treat">
+            <h2 className="heading-sm">Your next treat: {nextTreat.name}</h2>
+            {nextTreat.price <= coins ? (
+              <>
+                <p className="caption mt-1">You have {coins} coins. This one is ready!</p>
+                <Button className="mt-3" size="sm" onClick={() => post(`/sanctuary/purchase/${nextTreat.key}`)}>
+                  Buy it for {nextTreat.price} coins
+                </Button>
+              </>
+            ) : (
+              <>
+                <div
+                  className="mt-3 h-2 overflow-hidden rounded-full bg-hairline"
+                  role="progressbar"
+                  aria-label={`Coins towards ${nextTreat.name}`}
+                  aria-valuemin={0}
+                  aria-valuemax={nextTreat.price}
+                  aria-valuenow={coins}
+                >
+                  <div className="h-full rounded-full bg-accent-strong" style={{ width: `${Math.round((coins / nextTreat.price) * 100)}%` }} />
+                </div>
+                <p className="caption mt-1">{nextTreat.price - coins} more coins to go. A couple of quests will do it.</p>
+              </>
+            )}
+          </section>
+        )}
+
         <section className="mt-8 grid gap-8 lg:grid-cols-2" aria-label={room.name}>
-          <div className="space-y-3">
+          <div ref={cottageRef} className="space-y-3">
             <Cottage placements={shown} room={roomKey} names={names} />
             {preview && (
               <div className="flex flex-wrap items-center gap-3" role="status">
@@ -120,7 +152,7 @@ export default function SanctuaryShow() {
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {!here && (
-                        <Button size="sm" variant="ghost" onClick={() => setPreview(item)} aria-pressed={preview?.key === item.key}>
+                        <Button size="sm" variant="ghost" onClick={() => { setPreview(item); cottageRef.current?.scrollIntoView({ block: "center" }) }} aria-pressed={preview?.key === item.key}>
                           Preview
                         </Button>
                       )}
@@ -139,7 +171,7 @@ export default function SanctuaryShow() {
                           disabled={short > 0}
                           onClick={() => post(`/sanctuary/purchase/${item.key}`)}
                         >
-                          {short > 0 ? `Need ${short} more` : "Buy"}
+                          {short > 0 ? `${short} coins to go` : "Buy"}
                         </Button>
                       )}
                     </div>

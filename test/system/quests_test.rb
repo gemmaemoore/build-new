@@ -30,6 +30,15 @@ class QuestsTest < ApplicationSystemTestCase
     assert_selector "li", text: /Water plants/
   end
 
+  test "less-used actions live in a More menu on each quest" do
+    visit quests_path
+    assert_no_button "Skip", exact: true
+    find("button[aria-label='More actions: Wipe kitchen countertops']").click
+    assert_selector "[role=menuitem]", text: "Skip this time"
+    assert_selector "[role=menuitem]", text: "Edit"
+    assert_selector "[role=menuitem]", text: "Remove"
+  end
+
   test "filters by difficulty" do
     assert_text "Today's list"
     assert_text "Wipe kitchen countertops"
