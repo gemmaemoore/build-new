@@ -35,6 +35,7 @@ export type Quest = {
   assignee_id: number | null
   assignee_name: string | null
   rotate: boolean
+  boss: { id: number; title: string; done: number; total: number } | null
   last_done_days: number | null
 }
 

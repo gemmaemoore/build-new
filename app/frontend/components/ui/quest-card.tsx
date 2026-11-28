@@ -19,6 +19,8 @@ export interface QuestCardProps extends React.HTMLAttributes<HTMLElement> {
   status?: string
   /** Whose turn it is, when the chore is assigned. */
   assignee?: string | null
+  /** The boss battle this chore is a stage of, if any. */
+  boss?: { title: string; done: number; total: number } | null
   /** Whole days since last done; null when never. Informational only. */
   lastDoneDays?: number | null
   /** Action buttons rendered in the footer. */
@@ -27,7 +29,7 @@ export interface QuestCardProps extends React.HTMLAttributes<HTMLElement> {
 
 const QuestCard = React.forwardRef<HTMLElement, QuestCardProps>(
   (
-    { fantasyTitle, title, monsterName, monsterKey, minutes, difficulty, xp, coins, status, assignee, lastDoneDays, actions, className, ...props },
+    { fantasyTitle, title, monsterName, monsterKey, minutes, difficulty, xp, coins, status, assignee, boss, lastDoneDays, actions, className, ...props },
     ref,
   ) => (
     <article
@@ -49,6 +51,7 @@ const QuestCard = React.forwardRef<HTMLElement, QuestCardProps>(
         <Badge tone="muted">{difficulty}</Badge>
         <Badge tone="signal">+{xp} XP</Badge>
         <Badge tone="signal">+{coins} coins</Badge>
+        {boss && <Badge tone="signal">Boss: {boss.title} {boss.done}/{boss.total}</Badge>}
         {assignee && <Badge tone="accent">Turn: {assignee}</Badge>}
         {status && <Badge tone="accent">{status}</Badge>}
       </div>

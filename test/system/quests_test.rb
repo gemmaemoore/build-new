@@ -20,7 +20,7 @@ class QuestsTest < ApplicationSystemTestCase
     end
     assert_text "Water plants"
 
-    within(find("article", text: "Water plants")) { click_button "Complete" }
+    within(find("article", text: "Water plants")) { click_button "Done!" }
     assert_text "defeated!"
     assert_text "+15 XP"
     click_button "That's enough for now"
@@ -31,7 +31,9 @@ class QuestsTest < ApplicationSystemTestCase
   end
 
   test "filters by difficulty" do
+    assert_text "Today's list"
     assert_text "Wipe kitchen countertops"
+    find("summary", text: "Filters").click
     click_button "Boss"
     assert_text "No quests match these filters."
   end
@@ -46,7 +48,7 @@ class QuestsTest < ApplicationSystemTestCase
     within("[role=dialog]") do
       click_button "Just 2 minutes"
       assert_selector "[role=timer]"
-      click_button "Complete"
+      click_button "Done!"
     end
     assert_text "defeated!"
     assert_text "1st win today"

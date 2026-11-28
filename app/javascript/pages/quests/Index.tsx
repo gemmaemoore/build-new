@@ -62,6 +62,8 @@ function recurrenceText(q: Quest) {
   return undefined
 }
 
+const TODAY_LIMIT = 7
+
 function formatDate(iso: string) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })
 }
@@ -76,6 +78,7 @@ export default function QuestsIndex() {
   const [time, setTime] = useState("any")
   const [difficulty, setDifficulty] = useState("All")
   const [person, setPerson] = useState("all")
+  const [showAll, setShowAll] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Quest | null>(null)
 
@@ -86,6 +89,12 @@ export default function QuestsIndex() {
       (difficulty === "All" || q.difficulty === difficulty) &&
       (person === "all" || String(q.assignee_id) === person),
   )
+
+  const filtersActive = room !== "all" || time !== "any" || difficulty !== "All" || person !== "all"
+  // Quick wins first. Until a filter is used, show a short list so the board never opens as a wall.
+  const sorted = [...visible].sort((a, b) => a.duration_minutes - b.duration_minutes)
+  const shown = showAll || filtersActive ? sorted : sorted.slice(0, TODAY_LIMIT)
+  const hiddenCount = sorted.length - shown.length
 
   const post = (path: string, data: Record<string, string | number> = {}) =>
     router.post(path, data, { preserveScroll: true })
@@ -98,8 +107,8 @@ export default function QuestsIndex() {
   const actions = (q: Quest) => (
     <>
       {q.available && (
-        <Button size="sm" aria-label={`Complete ${q.title}`} onClick={() => post(`/tasks/${q.id}/complete`)}>
-          Complete
+        <Button size="sm" aria-label={`Done: ${q.title}`} onClick={() => post(`/tasks/${q.id}/complete`)}>
+          Done!
         </Button>
       )}
       {q.available && (
@@ -158,31 +167,44 @@ export default function QuestsIndex() {
           }
         />
 
-        <section className="mt-8 space-y-3" aria-label="Filters">
-          <Chips
-            label="Filter by room"
-            value={room}
-            onChange={setRoom}
-            options={[{ value: "all", label: "All rooms" }, ...options.rooms.map((r) => ({ value: r, label: humanize(r) }))]}
-          />
-          <Chips label="Filter by time" value={time} onChange={setTime} options={TIME_FILTERS} />
-          <Chips
-            label="Filter by difficulty"
-            value={difficulty}
-            onChange={setDifficulty}
-            options={DIFFICULTY_FILTERS.map((d) => ({ value: d, label: d }))}
-          />
-          {members.length > 0 && (
+        <details className="mt-8" open={filtersActive}>
+          <summary className="cursor-pointer">Filters{filtersActive ? " (on)" : ""}</summary>
+          <section className="mt-3 space-y-3" aria-label="Filters">
             <Chips
-              label="Filter by person"
-              value={person}
-              onChange={setPerson}
-              options={[{ value: "all", label: "Everyone" }, ...members.map((m) => ({ value: String(m.id), label: m.name }))]}
+              label="Filter by room"
+              value={room}
+              onChange={setRoom}
+              options={[{ value: "all", label: "All rooms" }, ...options.rooms.map((r) => ({ value: r, label: humanize(r) }))]}
             />
-          )}
-        </section>
+            <Chips label="Filter by time" value={time} onChange={setTime} options={TIME_FILTERS} />
+            <Chips
+              label="Filter by difficulty"
+              value={difficulty}
+              onChange={setDifficulty}
+              options={DIFFICULTY_FILTERS.map((d) => ({ value: d, label: d }))}
+            />
+            {members.length > 0 && (
+              <Chips
+                label="Filter by person"
+                value={person}
+                onChange={setPerson}
+                options={[{ value: "all", label: "Everyone" }, ...members.map((m) => ({ value: String(m.id), label: m.name }))]}
+              />
+            )}
+          </section>
+        </details>
 
         <section className="mt-8" aria-label="Available quests">
+          {quests.length > 0 && (
+            <>
+              <h2>{filtersActive ? "Matching quests" : "Today's list"}</h2>
+              <p className="mb-4 caption">
+                {filtersActive || showAll
+                  ? `${sorted.length} ${sorted.length === 1 ? "quest" : "quests"}, quickest first.`
+                  : `The ${shown.length} quickest of ${sorted.length}. Start with one small one.`}
+              </p>
+            </>
+          )}
           {visible.length === 0 ? (
             quests.length === 0 ? (
               <EmptyState
@@ -202,7 +224,7 @@ export default function QuestsIndex() {
             )
           ) : (
             <ul className="grid list-none gap-4 p-0 sm:grid-cols-2">
-              {visible.map((q) => (
+              {shown.map((q) => (
                 <li key={q.id}>
                   <QuestCard
                     fantasyTitle={q.fantasy_title}
@@ -215,12 +237,18 @@ export default function QuestsIndex() {
                     coins={q.coins}
                     status={statusFor(q)}
                     assignee={q.assignee_name}
+                    boss={q.boss}
                     lastDoneDays={q.last_done_days}
                     actions={actions(q)}
                   />
                 </li>
               ))}
             </ul>
+          )}
+          {hiddenCount > 0 && (
+            <Button className="mt-4" variant="secondary" onClick={() => setShowAll(true)}>
+              Show all {sorted.length} quests
+            </Button>
           )}
         </section>
 
@@ -241,6 +269,7 @@ export default function QuestsIndex() {
                     coins={q.coins}
                     status={statusFor(q)}
                     assignee={q.assignee_name}
+                    boss={q.boss}
                     lastDoneDays={q.last_done_days}
                     actions={actions(q)}
                   />

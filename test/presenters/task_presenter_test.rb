@@ -25,4 +25,15 @@ class TaskPresenterTest < ActiveSupport::TestCase
     @task.uncomplete!
     assert_nil json[:last_done_days]
   end
+
+  test "a chore stacked into an active battle reports its boss progress" do
+    other = @user.tasks.create!(title: "Mop")
+    third = @user.tasks.create!(title: "Bins")
+    battle = BossBattle.build_for(@user, title: "Kitchen boss", monster_key: "counter_goblins", task_ids: [ @task.id, other.id, third.id ]).tap(&:save!)
+    other.complete!(today: @user.today)
+    map = TaskPresenter.boss_map([ @task, other ])
+    assert_equal({ title: "Kitchen boss", done: 1, total: 3, id: battle.id }, map[@task.id])
+    battle.abandon!
+    assert_empty TaskPresenter.boss_map([ @task ])
+  end
 end

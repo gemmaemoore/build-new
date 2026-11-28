@@ -132,7 +132,7 @@ export function FocusMode({
             {twoDone || (mode !== "idle") ? "That's enough for now" : "Back"}
           </Button>
           <Button variant="secondary" onClick={() => post(`/tasks/${target.task_id}/skip`, onClose)}>Skip</Button>
-          <Button onClick={() => post(`/tasks/${target.task_id}/complete`, onClose)}>Complete</Button>
+          <Button onClick={() => post(`/tasks/${target.task_id}/complete`, onClose)}>Done!</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

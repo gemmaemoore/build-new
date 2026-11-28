@@ -10,10 +10,22 @@ class TaskPresenter
     Completion.active.where(task_id: tasks.map(&:id)).group(:task_id).maximum(:completed_at)
   end
 
-  def initialize(task, today:, last_done: nil)
+  # task_id => { title:, done:, total: } for chores stacked into an active
+  # boss battle, so the board can say "Boss: Kitchen 2/4".
+  def self.boss_map(tasks)
+    stages = BossStage.joins(:boss_battle).merge(BossBattle.active).where(task_id: tasks.map(&:id))
+                      .includes(boss_battle: :stages)
+    stages.each_with_object({}) do |stage, map|
+      battle = stage.boss_battle
+      map[stage.task_id] = { title: battle.title, done: battle.stages.count(&:done?), total: battle.stages.size, id: battle.id }
+    end
+  end
+
+  def initialize(task, today:, last_done: nil, boss: nil)
     @task = task
     @today = today
     @last_done = last_done
+    @boss = boss
   end
 
   def as_json(*)
@@ -42,6 +54,7 @@ class TaskPresenter
       assignee_id: @task.assignee_id,
       assignee_name: @task.assignee&.name,
       rotate: @task.rotate,
+      boss: @boss,
       last_done_days: last_done_days,
       xp: @task.xp,
       coins: @task.coins
