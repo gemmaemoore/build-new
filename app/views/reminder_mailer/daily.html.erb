@@ -1,0 +1,9 @@
+<p>Hi <%= @user.greeting_name %>,</p>
+<p>Here's one tiny thing for today (about <%= @minutes %> <%= "minute".pluralize(@minutes) %>):</p>
+<p><strong><%= @task.title %></strong></p>
+<p>Just two minutes counts, and starting earns points. The bird might even find you something.</p>
+<p><%= link_to "Open Nest Quest", root_url %></p>
+<p style="color:#666;font-size:12px">
+  Not today? That's completely fine; nothing is lost.
+  <%= link_to "Stop these reminders", @unsubscribe_url %>.
+</p>

@@ -22,6 +22,7 @@ Rails.application.routes.draw do
     end
   end
 
+  get "reminders/unsubscribe/:token", to: "reminders#unsubscribe", as: :reminders_unsubscribe
   post "lucky_button", to: "lucky_buttons#create", as: :lucky_button
   get  "blitz", to: "blitz#show", as: :blitz
   post "blitz/finish", to: "blitz#finish", as: :blitz_finish

@@ -17,13 +17,23 @@ import {
 
 import type { PageProps } from "@/types/inertia"
 
+const hourLabel = (h: number) => (h === 12 ? "12 noon" : h > 12 ? `${h - 12}pm` : `${h}am`)
+
 const DESCRIPTION = "Choose your display name, reduce motion, or reset your Nest Quest game data."
 
 export default function Settings() {
   const { props } = usePage<
     PageProps<{
-      settings: { display_name: string | null; reduced_motion: boolean; anchor: string | null; treat: string | null }
+      settings: {
+        display_name: string | null
+        reduced_motion: boolean
+        anchor: string | null
+        treat: string | null
+        reminder_enabled: boolean
+        reminder_hour: number
+      }
       anchors: string[]
+      reminder_hours: number[]
       household: { id: number; name: string }[]
     }>
   >()
@@ -33,6 +43,8 @@ export default function Settings() {
     reduced_motion: props.settings.reduced_motion,
     anchor: props.settings.anchor ?? "",
     treat: props.settings.treat ?? "",
+    reminder_enabled: props.settings.reminder_enabled,
+    reminder_hour: props.settings.reminder_hour,
   })
   const [confirmReset, setConfirmReset] = useState(false)
   const [newMember, setNewMember] = useState("")
@@ -89,6 +101,36 @@ export default function Settings() {
             />
             <p className="caption">Shown as a gentle reminder when you start a task.</p>
             {errors.treat && <p className="text-xs text-danger-display">{errors.treat}</p>}
+          </div>
+
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 font-normal text-ink-body">
+              <Checkbox
+                className="mt-1"
+                checked={form.data.reminder_enabled}
+                onChange={(e) => form.setData("reminder_enabled", e.target.checked)}
+              />
+              <span>
+                Email me one tiny thing each day
+                <span className="block text-sm text-ink-muted">
+                  One short email at the time you pick. If you've already done something that day, we won't send it.
+                </span>
+              </span>
+            </label>
+            {form.data.reminder_enabled && (
+              <div className="space-y-2">
+                <label htmlFor="reminder-hour">Send it around</label>
+                <Select
+                  id="reminder-hour"
+                  value={String(form.data.reminder_hour)}
+                  onChange={(e) => form.setData("reminder_hour", Number(e.target.value))}
+                >
+                  {props.reminder_hours.map((h) => (
+                    <option key={h} value={h}>{hourLabel(h)}</option>
+                  ))}
+                </Select>
+              </div>
+            )}
           </div>
 
           <label className="flex items-start gap-3 font-normal text-ink-body">

@@ -14,6 +14,13 @@ class User < ApplicationRecord
   has_many :owned_decorations, dependent: :destroy
   has_many :sanctuary_placements, dependent: :destroy
 
+  REMINDER_HOURS = [ 8, 9, 12, 15, 18, 20 ].freeze
+
+  # Signed, expiring-never link in reminder emails to switch them off in one tap.
+  generates_token_for :reminder_unsubscribe
+
+  validates :reminder_hour, inclusion: { in: REMINDER_HOURS }
+
   normalizes :email, with: ->(e) { e.strip.downcase }
 
   validates :email, presence: true, uniqueness: { case_sensitive: false },

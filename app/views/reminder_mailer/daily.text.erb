@@ -1,0 +1,12 @@
+Hi <%= @user.greeting_name %>,
+
+Here's one tiny thing for today (about <%= @minutes %> <%= "minute".pluralize(@minutes) %>):
+
+  <%= @task.title %>
+
+Just two minutes counts, and starting earns points. The bird might even find you something.
+
+Open Nest Quest: <%= root_url %>
+
+Not today? That's completely fine; nothing is lost.
+Stop these reminders: <%= @unsubscribe_url %>
