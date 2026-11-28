@@ -161,6 +161,10 @@ export type Victory = {
   coins: number
   level: number
   leveled_up: boolean
+  surprise: { message: string; xp: number; coins: number; rare: boolean; gift: string | null } | null
+  xp_to_next: number
+  wins_today: number
+  next_quest: { id: number; title: string; minutes: number; xp: number; monster_key: string; fantasy_title: string } | null
 }
 
 export type SharedProps = {

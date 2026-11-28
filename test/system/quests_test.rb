@@ -49,6 +49,8 @@ class QuestsTest < ApplicationSystemTestCase
       click_button "Complete"
     end
     assert_text "defeated!"
+    assert_text "1st win today"
+    assert_text "XP to level 2"
   end
 
   test "plan my day is three separate steps ending in a plan with a buffer" do

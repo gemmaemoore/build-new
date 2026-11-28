@@ -546,3 +546,20 @@ html {
   }
 }
 .reduce-motion .confetti { display: none; }
+
+/* A gentle pop for happy surprises; none when motion is reduced. */
+.surprise-card {
+  border-radius: 1rem;
+  border: 1px solid var(--color-signal);
+  background: var(--color-signal-faded);
+  padding: 0.75rem 1rem;
+}
+.surprise-card.rare { border-width: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .surprise-card { animation: pop-in 520ms cubic-bezier(.2,1.4,.4,1) 250ms both; }
+  @keyframes pop-in {
+    0%   { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+}
+.reduce-motion .surprise-card { animation: none; }

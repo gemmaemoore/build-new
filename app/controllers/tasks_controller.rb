@@ -124,7 +124,7 @@ class TasksController < ApplicationController
       ready = Current.user.tasks.available_on(Current.user.today).where.not(id: @task.id).order(:duration_minutes, :id)
       task = ready.where(room: @task.room).first || ready.first
       task && { id: task.id, title: task.title, minutes: task.duration_minutes, xp: task.xp,
-                monster_key: task.monster_key_or_default }
+                monster_key: task.monster_key_or_default, fantasy_title: task.fantasy_title_or_default }
     end
 
     def redirect_back_with_errors(task)
