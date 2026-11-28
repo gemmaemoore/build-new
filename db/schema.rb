@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_28_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_28_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -118,6 +118,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_28_130000) do
     t.datetime "updated_at", null: false
     t.integer "peak_level", default: 1, null: false
     t.index ["user_id"], name: "index_player_progresses_on_user_id", unique: true
+  end
+
+  create_table "push_subscriptions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.text "endpoint", null: false
+    t.string "p256dh", null: false
+    t.string "auth", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
+    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
   end
 
   create_table "reward_transactions", force: :cascade do |t|
@@ -393,6 +404,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_28_130000) do
     t.boolean "reminder_enabled", default: false, null: false
     t.integer "reminder_hour", default: 9, null: false
     t.date "last_reminded_on"
+    t.boolean "reminder_email", default: true, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -408,6 +420,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_28_130000) do
   add_foreign_key "household_members", "users"
   add_foreign_key "owned_decorations", "users"
   add_foreign_key "player_progresses", "users"
+  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "reward_transactions", "completions"
   add_foreign_key "reward_transactions", "users"
   add_foreign_key "routine_step_completions", "routine_steps"

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Runs every hour. Emails each player who asked for a reminder when their own
+# Runs every hour. Emails (and push-notifies) each player who asked for a reminder when their own
 # local hour matches, at most once a day, and never when they have already done
 # something today (no nagging someone who is doing fine).
 class SendRemindersJob < ApplicationJob
@@ -16,8 +16,13 @@ class SendRemindersJob < ApplicationJob
       task = Habits::TodayPicker.new(user: user, today: local.to_date, exclude: nil, energy: "", easier: false).call.task
       next unless task
 
-      ReminderMailer.daily(user, task).deliver_later
-      user.update_columns(last_reminded_on: local.to_date)
+      sent = false
+      if user.reminder_email
+        ReminderMailer.daily(user, task).deliver_later
+        sent = true
+      end
+      sent = true if Push.notify(user, title: "One tiny thing today", body: task.title, path: "/").positive?
+      user.update_columns(last_reminded_on: local.to_date) if sent
     end
   end
 

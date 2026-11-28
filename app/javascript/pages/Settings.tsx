@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useEffect, useState } from "react"
 import { Head, Link, router, useForm, usePage } from "@inertiajs/react"
 import { AppShell } from "@/components/AppShell"
 import { PageHeader } from "@/components/PageHeader"
@@ -14,6 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+
+import { currentSubscription, disablePush, enablePush, pushSupported } from "@/lib/push"
 
 import type { PageProps } from "@/types/inertia"
 
@@ -31,9 +33,11 @@ export default function Settings() {
         treat: string | null
         reminder_enabled: boolean
         reminder_hour: number
+        reminder_email: boolean
       }
       anchors: string[]
       reminder_hours: number[]
+      push: { configured: boolean; public_key: string | null }
       household: { id: number; name: string }[]
     }>
   >()
@@ -45,9 +49,31 @@ export default function Settings() {
     treat: props.settings.treat ?? "",
     reminder_enabled: props.settings.reminder_enabled,
     reminder_hour: props.settings.reminder_hour,
+    reminder_email: props.settings.reminder_email,
   })
   const [confirmReset, setConfirmReset] = useState(false)
   const [newMember, setNewMember] = useState("")
+  const [pushState, setPushState] = useState<"checking" | "unsupported" | "off" | "on" | "denied" | "busy" | "failed">("checking")
+
+  // Is this device already subscribed? (Browser-only, so it runs after render.)
+  useEffect(() => {
+    if (!props.push.configured) return
+    if (!pushSupported()) return setPushState("unsupported")
+    if (Notification.permission === "denied") return setPushState("denied")
+    currentSubscription().then((s) => setPushState(s ? "on" : "off")).catch(() => setPushState("unsupported"))
+  }, [props.push.configured])
+
+  const togglePush = async () => {
+    if (!props.push.public_key) return
+    if (pushState === "on") {
+      setPushState("busy")
+      await disablePush()
+      return setPushState("off")
+    }
+    setPushState("busy")
+    const result = await enablePush(props.push.public_key).catch(() => "failed" as const)
+    setPushState(result === "enabled" ? "on" : result)
+  }
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -111,14 +137,46 @@ export default function Settings() {
                 onChange={(e) => form.setData("reminder_enabled", e.target.checked)}
               />
               <span>
-                Email me one tiny thing each day
+                Remind me of one tiny thing each day
                 <span className="block text-sm text-ink-muted">
-                  One short email at the time you pick. If you've already done something that day, we won't send it.
+                  One short reminder at the time you pick. If you've already done something that day, we won't send it.
                 </span>
               </span>
             </label>
             {form.data.reminder_enabled && (
-              <div className="space-y-2">
+              <div className="space-y-3 pl-8">
+                <label className="flex items-start gap-3 font-normal text-ink-body">
+                  <Checkbox
+                    className="mt-1"
+                    checked={form.data.reminder_email}
+                    onChange={(e) => form.setData("reminder_email", e.target.checked)}
+                  />
+                  <span>By email</span>
+                </label>
+                {props.push.configured && (
+                  <div className="space-y-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled={pushState === "checking" || pushState === "busy" || pushState === "unsupported" || pushState === "denied"}
+                      onClick={togglePush}
+                    >
+                      {pushState === "on" ? "Stop notifying this device" : "Notify this device"}
+                    </Button>
+                    <p className="caption" aria-live="polite">
+                      {pushState === "on" && "This device will get a gentle notification."}
+                      {pushState === "off" && "Get a gentle notification on this phone or computer."}
+                      {pushState === "denied" && "Notifications are blocked for this site in your browser settings."}
+                      {pushState === "unsupported" && "This browser can't show notifications. On iPhone, add Nest Quest to your home screen first."}
+                      {pushState === "failed" && "That didn't work. Please try again."}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+            {form.data.reminder_enabled && (
+              <div className="space-y-2 pl-8">
                 <label htmlFor="reminder-hour">Send it around</label>
                 <Select
                   id="reminder-hour"

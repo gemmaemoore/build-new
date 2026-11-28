@@ -40,4 +40,28 @@ class SendRemindersJobTest < ActiveJob::TestCase
     @user.tasks.destroy_all
     assert_no_enqueued_emails { SendRemindersJob.perform_now(now: @at) }
   end
+
+  test "push-only reminders skip email but still count as sent" do
+    require "minitest/mock"
+    @user.update!(reminder_email: false)
+    @user.push_subscriptions.create!(endpoint: "https://push.example.com/x", p256dh: "p", auth: "a")
+    old = ENV.values_at("VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY")
+    ENV["VAPID_PUBLIC_KEY"], ENV["VAPID_PRIVATE_KEY"] = "pub", "priv"
+    sent = []
+    begin
+      WebPush.stub(:payload_send, ->(**args) { sent << args }) do
+        assert_no_enqueued_emails { SendRemindersJob.perform_now(now: @at) }
+      end
+    ensure
+      ENV["VAPID_PUBLIC_KEY"], ENV["VAPID_PRIVATE_KEY"] = old
+    end
+    assert_equal 1, sent.size
+    assert_equal Date.new(2026, 12, 1), @user.reload.last_reminded_on
+  end
+
+  test "with email off and no devices nothing is sent and today is not used up" do
+    @user.update!(reminder_email: false)
+    assert_no_enqueued_emails { SendRemindersJob.perform_now(now: @at) }
+    assert_nil @user.reload.last_reminded_on
+  end
 end

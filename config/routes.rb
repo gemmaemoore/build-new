@@ -23,6 +23,8 @@ Rails.application.routes.draw do
     end
   end
 
+  get "service-worker", to: "rails/pwa#service_worker", as: :pwa_service_worker
+  resource :push_subscription, only: %i[ create destroy ]
   get "reminders/unsubscribe/:token", to: "reminders#unsubscribe", as: :reminders_unsubscribe
   post "lucky_button", to: "lucky_buttons#create", as: :lucky_button
   get  "blitz", to: "blitz#show", as: :blitz

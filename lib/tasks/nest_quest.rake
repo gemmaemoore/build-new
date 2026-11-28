@@ -21,4 +21,13 @@ namespace :nest_quest do
       exit 1
     end
   end
+
+  desc "Print a new VAPID key pair for browser push notifications"
+  task vapid_keys: :environment do
+    keys = WebPush.generate_key
+    puts "Set these in the environment (never commit the private key):"
+    puts "  VAPID_PUBLIC_KEY=#{keys.public_key}"
+    puts "  VAPID_PRIVATE_KEY=#{keys.private_key}"
+    puts "  VAPID_SUBJECT=mailto:you@example.com   # optional contact"
+  end
 end

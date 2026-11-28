@@ -63,3 +63,5 @@ gem "vite_rails", "~> 3.0"
 # every public page. See config/sitemap.rb. Refresh with:
 #   bin/rails sitemap:refresh:no_ping  (writes to public/sitemap.xml)
 gem "sitemap_generator"
+
+gem "web-push", "~> 3.1"
