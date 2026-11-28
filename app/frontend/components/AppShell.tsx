@@ -1,6 +1,7 @@
 import * as React from "react"
 import { usePage } from "@inertiajs/react"
 import { MainNav } from "@/components/MainNav"
+import { BlitzPill } from "@/components/BlitzPill"
 import { VictoryDialog } from "@/components/VictoryDialog"
 import { XpBar } from "@/components/ui/xp-bar"
 
@@ -55,6 +56,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </main>
+      <BlitzPill />
       <VictoryDialog />
     </div>
   )

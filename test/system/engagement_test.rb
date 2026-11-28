@@ -46,6 +46,28 @@ class EngagementTest < ApplicationSystemTestCase
     assert_field "battle-title", with: "The Kitchen boss"
   end
 
+  test "a blitz keeps going when you leave and come back, and you choose the chores" do
+    user = users(:one)
+    user.tasks.destroy_all
+    %w[Alpha Bravo Charlie].each { |t| user.tasks.create!(title: "Chore #{t}", duration_minutes: 3) }
+    visit blitz_path
+    assert_text "Choose your chores"
+    js_click find_button("Clear")
+    js_click find_field("Chore Bravo", visible: :all)
+    assert_text "1 chore"
+    js_click find_button("Start the blitz")
+    assert_selector "[role=timer]"
+    assert_text "Chore Bravo"
+    assert_no_text "Chore Alpha"
+
+    visit root_path
+    assert_link "Blitz:", wait: 8
+    click_link "Blitz:"
+    assert_text "Your line-up"
+    assert_text "Chore Bravo"
+    assert_text "Add more chores (2 ready)"
+  end
+
   test "the codex, insights, badges and challenges all load" do
     visit codex_path
     assert_text "Monster Codex"

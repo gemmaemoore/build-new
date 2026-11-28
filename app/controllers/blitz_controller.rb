@@ -1,18 +1,21 @@
 # frozen_string_literal: true
 
-# Tidy blitz: pick 5-20 minutes and get a line-up of small chores that fit,
-# shortest first. Optional, no penalty for stopping early.
+# Tidy blitz: pick 5-20 minutes and choose the chores (or take a suggestion),
+# then race the clock. Optional, no penalty for stopping early.
 class BlitzController < ApplicationController
   OPTIONS = [ 5, 10, 15, 20 ].freeze
+  CHOICE_LIMIT = 40
 
   def show
     minutes = params[:minutes].to_i
     minutes = 10 unless OPTIONS.include?(minutes)
     today = Current.user.today
+    available = Current.user.tasks.available_on(today).order(:duration_minutes, :id).includes(:assignee, :user).limit(60).to_a
     render inertia: "blitz/Show", props: {
       minutes: minutes,
       options: OPTIONS,
-      queue: line_up(minutes, today).map { |t| TaskPresenter.new(t, today: today).as_json },
+      choices: available.first(CHOICE_LIMIT).map { |t| TaskPresenter.new(t, today: today).as_json },
+      suggested: line_up(available, minutes).map(&:id),
       treat: Current.user.treat,
       bonus: { min: Game::Economy.blitz_min_cleared, **Game::Economy.blitz_bonus(1) },
       playlists: Game::Catalog.playlists.map { |p| p.slice("key", "label", "blurb", "spotify_id").symbolize_keys }
@@ -40,7 +43,7 @@ class BlitzController < ApplicationController
   # bonus per chore, once per sprint (keyed by its last completion).
   def finish
     minutes = OPTIONS.include?(params[:minutes].to_i) ? params[:minutes].to_i : 10
-    recent = Current.user.completions.active.where(completed_at: (minutes + 2).minutes.ago..).order(:completed_at).to_a
+    recent = Current.user.completions.active.where(completed_at: since(minutes)..).order(:completed_at).to_a
     if recent.size >= Game::Economy.blitz_min_cleared
       bonus = Game::Economy.blitz_bonus(recent.size)
       award = Game::AwardOneOff.call(user: Current.user, kind: "blitz", reference: "blitz:#{recent.last.id}",
@@ -51,10 +54,18 @@ class BlitzController < ApplicationController
   end
 
   private
-    # Shortest first until the time budget is used; always at least one chore.
-    def line_up(minutes, today)
+    # When the sprint began: the browser's start time if it is plausible (within
+    # the last three hours), otherwise just the sprint length ago.
+    def since(minutes)
+      started = Time.zone.at(params[:started_at].to_i / 1000.0)
+      params[:started_at].present? && started > 3.hours.ago && started <= Time.current ? started : (minutes + 2).minutes.ago
+    end
+
+    # A suggestion: shortest first until the time budget is used (always at
+    # least one). The player can ignore it and choose their own.
+    def line_up(available, minutes)
       budget = minutes
-      Current.user.tasks.available_on(today).order(:duration_minutes, :id).limit(60).each_with_object([]) do |task, out|
+      available.each_with_object([]) do |task, out|
         next if task.duration_minutes > budget && out.any?
         next if task.duration_minutes > minutes
 

@@ -15,16 +15,16 @@ class BlitzControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
-  test "lines up the shortest chores that fit the time" do
+  test "suggests the shortest chores that fit, but offers every ready chore to choose from" do
     log_in_as(@user)
-    chore("Quick", 3)
-    chore("Medium", 5)
-    chore("Long", 25)
+    quick = chore("Quick", 3)
+    medium = chore("Medium", 5)
+    long = chore("Long", 25)
     get blitz_path(minutes: 10)
     assert_response :success
-    assert_includes response.body, "Quick"
-    assert_includes response.body, "Medium"
-    assert_not_includes response.body, "&quot;title&quot;:&quot;Long&quot;"
+    assert_includes response.body, "&quot;suggested&quot;:[#{quick.id},#{medium.id}]"
+    assert_includes response.body, "&quot;title&quot;:&quot;Long&quot;"
+    assert_not_includes response.body, "[#{quick.id},#{medium.id},#{long.id}]"
   end
 
   test "an odd length falls back to ten minutes" do
@@ -67,6 +67,23 @@ class BlitzControllerTest < ActionDispatch::IntegrationTest
     chore("A", 2).complete!(today: @user.today)
     assert_no_difference -> { RewardTransaction.where(kind: "blitz").count } do
       post blitz_finish_path(minutes: 10)
+    end
+  end
+
+  test "the bonus counts chores done since the blitz began, even if finishing late" do
+    log_in_as(@user)
+    started = 25.minutes.ago
+    3.times { |i| chore("Late #{i}", 2).complete!(today: @user.today, at: started + (i + 1).minutes) }
+    assert_difference -> { RewardTransaction.where(kind: "blitz").count }, 1 do
+      post blitz_finish_path(minutes: 10, started_at: (started.to_f * 1000).to_i)
+    end
+  end
+
+  test "an implausible start time falls back to the sprint length" do
+    log_in_as(@user)
+    3.times { |i| chore("Old #{i}", 2).complete!(today: @user.today, at: (25 - i).minutes.ago) }
+    assert_no_difference -> { RewardTransaction.where(kind: "blitz").count } do
+      post blitz_finish_path(minutes: 10, started_at: 1)
     end
   end
 end
