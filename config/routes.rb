@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # Installable on a phone home screen (manifest has quick shortcuts).
+  get "manifest", to: "rails/pwa#manifest", as: :pwa_manifest
+
   get  "login",  to: "sessions#new",     as: :login
   post "login",  to: "sessions#create"
   delete "logout", to: "sessions#destroy", as: :logout

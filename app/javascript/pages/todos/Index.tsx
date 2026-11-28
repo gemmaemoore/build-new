@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useEffect, useState } from "react"
 import { Head, router, useForm, usePage } from "@inertiajs/react"
 import { AppShell } from "@/components/AppShell"
 import { PageHeader } from "@/components/PageHeader"
@@ -86,6 +86,10 @@ export default function Todos() {
   const { props } = usePage<PageProps<{ open: TodoItem[]; done: TodoItem[]; daily_cap: number }>>()
   const { open, done, daily_cap } = props
   const form = useForm({ title: "", remind_on: "" })
+  // The home-screen "Add a to-do" shortcut lands here with ?add=1: ready to type.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("add") === "1") document.getElementById("new-todo")?.focus()
+  }, [])
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
