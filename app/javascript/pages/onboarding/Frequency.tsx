@@ -20,6 +20,8 @@ export default function Frequency() {
   const base = wizard.mode === "setup" ? "/welcome" : "/add-chores"
 
   const rooms = Array.from(new Set(chores.map((c) => c.room_key)))
+  const many = chores.length > 12
+  const submit = () => router.post(`${base}/frequency`, { frequencies: values })
 
   return (
     <>
@@ -33,18 +35,29 @@ export default function Frequency() {
         title="How often should each one come round?"
         description="Wipe the sides daily, clean the oven monthly: we've picked sensible defaults. Change any you like."
         footer={
-          <Button size="lg" onClick={() => router.post(`${base}/frequency`, { frequencies: values })}>
+          <Button size="lg" onClick={submit}>
             {wizard.mode === "setup" ? "Next: almost done" : "Add these chores"}
           </Button>
         }
       >
-        <div className="space-y-8">
+        <div className="mb-6 rounded-xl border border-hairline bg-accent-faded p-4" role="status">
+          <p>
+            <strong>{chores.length} {chores.length === 1 ? "chore" : "chores"} in {rooms.length} {rooms.length === 1 ? "room" : "rooms"}.</strong>{" "}
+            The defaults are sensible, so you can skip ahead. Everything stays editable later.
+          </p>
+          <Button className="mt-3" onClick={submit}>
+            {wizard.mode === "setup" ? "Looks good, skip ahead" : "Looks good, add them"}
+          </Button>
+        </div>
+        <p className="mb-3 caption">Or change how often anything comes round:</p>
+        <div className="space-y-4">
           {rooms.map((room) => (
-            <section key={room} aria-labelledby={`freq-${room}`}>
-              <div className="flex items-center gap-3">
+            <details key={room} className="rounded-xl border border-hairline bg-surface p-4" open={!many}>
+              <summary className="flex cursor-pointer items-center gap-3" aria-labelledby={`freq-${room}`}>
                 <RoomIcon room={room} className="h-8 w-8" />
-                <h2 id={`freq-${room}`}>{chores.find((c) => c.room_key === room)!.room_label}</h2>
-              </div>
+                <span id={`freq-${room}`} className="heading-sm">{chores.find((c) => c.room_key === room)!.room_label}</span>
+                <span className="caption">({chores.filter((c) => c.room_key === room).length})</span>
+              </summary>
               <ul className="mt-3 space-y-3">
                 {chores.filter((c) => c.room_key === room).map((c) => (
                   <li key={c.key} className="grid items-center gap-2 sm:grid-cols-[1fr_12rem]">
@@ -57,7 +70,7 @@ export default function Frequency() {
                   </li>
                 ))}
               </ul>
-            </section>
+            </details>
           ))}
         </div>
       </WizardShell>

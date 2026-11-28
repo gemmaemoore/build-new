@@ -23,7 +23,7 @@ export default function Intro() {
       <WizardShell
         wizard={wizard}
         title="Welcome to Nest Quest"
-        description="Your real chores become quests. Finish them to earn XP and coins, then spend the coins making your cottage cosier. Skip or postpone anything, any time, with no penalty."
+        description="Your real chores become tiny quests. Finish one, earn points (XP) and coins, and spend the coins on a cosy cottage. Skip anything, any time, no penalty."
         footer={
           <>
             <Button asChild size="lg">
@@ -36,9 +36,10 @@ export default function Intro() {
         }
       >
         <ul className="grid list-none grid-cols-3 gap-4 p-0 sm:grid-cols-5" aria-label="What we will set up">
-          {["kitchen", "bedroom", "bathroom", "living_room", "garden"].map((room) => (
-            <li key={room} className="flex justify-center">
+          {[["kitchen", "Kitchen"], ["bedroom", "Bedroom"], ["bathroom", "Bathroom"], ["living_room", "Living room"], ["garden", "Garden"]].map(([room, label]) => (
+            <li key={room} className="flex flex-col items-center gap-1">
               <RoomIcon room={room} className="h-16 w-16" />
+              <span className="caption">{label}</span>
             </li>
           ))}
         </ul>
@@ -46,7 +47,7 @@ export default function Intro() {
           <li><strong>1. Your rooms.</strong> Tell us which rooms you have.</li>
           <li><strong>2. Your chores.</strong> We suggest the usual housework for each room.</li>
           <li><strong>3. How often.</strong> Sensible defaults, all editable.</li>
-          <li><strong>4. Begin.</strong> A first small quest, ready in under two minutes.</li>
+          <li><strong>4. Begin.</strong> Your first tiny quest, ready in under two minutes.</li>
         </ol>
       </WizardShell>
     </>

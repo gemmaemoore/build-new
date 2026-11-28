@@ -17,7 +17,7 @@ const STEPS = [
   {
     monster: "laundry_troll",
     title: "Small wins add up",
-    text: "Finish a chore, send a monster to sleep, earn XP and coins. Start with just two minutes; starting counts.",
+    text: "Finish a chore, send a monster to sleep, earn points (XP) and coins, and keep an eye out for lucky finds. Start with just two minutes; starting counts.",
   },
   {
     monster: "wardrobe_wraith",
@@ -44,11 +44,13 @@ export default function Home() {
 
         <section className="mt-10 grid items-center gap-10 md:grid-cols-2" aria-label="Welcome">
           <div>
-            <Logo size="xl" className="mb-8" />
+            <div className="mb-8 hidden md:block">
+              <Logo size="xl" />
+            </div>
             <h1>Defeat chaos. Build calm.</h1>
             <p className="mt-4 text-lg">
-              Turn the work of running a home into a cosy adventure. Real chores, friendly monsters, and a cottage
-              that grows as you do.
+              Tiny chores, big little wins. Most quests take 2 to 5 minutes, and every win earns points,
+              coins and the odd happy surprise for your cosy cottage.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Button asChild size="lg">
