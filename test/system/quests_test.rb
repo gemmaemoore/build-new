@@ -23,7 +23,7 @@ class QuestsTest < ApplicationSystemTestCase
     within(find("article", text: "Water plants")) { click_button "Complete" }
     assert_text "defeated!"
     assert_text "+15 XP"
-    click_button "Lovely"
+    click_button "That's enough for now"
     assert_no_selector "article", text: "Water plants"
     assert_text "15 / 100 XP to level 2"
     assert_text "Recently completed"
