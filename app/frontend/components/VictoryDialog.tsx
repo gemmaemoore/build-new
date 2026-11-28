@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MonsterArt } from "@/components/ui/monster-art"
+import { LogoMark } from "@/components/Logo"
 import { Confetti } from "@/components/quest/Confetti"
 import { FocusMode } from "@/components/quest/FocusMode"
 
@@ -73,10 +74,13 @@ export function VictoryDialog() {
           </div>
           {victory.surprise && (
             <div className={`surprise-card mt-3 ${victory.surprise.rare ? "rare" : ""}`} role="status">
-              <p>
-                <strong>{victory.surprise.rare ? "A rare find! " : "A happy surprise! "}</strong>
-                {victory.surprise.message}
-              </p>
+              <div className="flex items-start gap-3">
+                <LogoMark className="bird-bob h-10 w-10 shrink-0" />
+                <p>
+                  <strong>{victory.surprise.rare ? "A rare find! " : "A happy surprise! "}</strong>
+                  {victory.surprise.message}
+                </p>
+              </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {victory.surprise.coins > 0 && <Badge tone="signal">+{victory.surprise.coins} coins</Badge>}
                 {victory.surprise.xp > 0 && <Badge tone="signal">+{victory.surprise.xp} XP</Badge>}

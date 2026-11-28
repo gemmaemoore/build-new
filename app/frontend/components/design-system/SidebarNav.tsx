@@ -40,6 +40,7 @@ const NAV: NavGroup[] = [
       { id: "room-icon", label: "Room icon" },
       { id: "monster-art", label: "Monster art" },
       { id: "empty-state", label: "Empty state" },
+      { id: "delight", label: "Delight" },
       { id: "progress-ring", label: "Progress ring" },
       { id: "listings", label: "Listings" },
       { id: "data-table", label: "Data table" },

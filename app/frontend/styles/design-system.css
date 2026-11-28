@@ -554,6 +554,23 @@ html {
 }
 .reduce-motion .confetti { display: none; }
 
+/* The bird's speech bubble, and a very slow bob (none when motion is reduced). */
+.speech-bubble {
+  position: relative;
+  border-radius: 1rem;
+  border: 1px solid var(--color-hairline);
+  background: var(--color-surface);
+  padding: 0.6rem 0.9rem;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bird-bob { animation: bird-bob 4s ease-in-out infinite; }
+  @keyframes bird-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+  }
+}
+.reduce-motion .bird-bob { animation: none; }
+
 /* A gentle pop for happy surprises; none when motion is reduced. */
 .surprise-card {
   border-radius: 1rem;

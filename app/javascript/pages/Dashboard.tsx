@@ -6,6 +6,7 @@ import { OneThingCard } from "@/components/quest/OneThingCard"
 import { LogoMark } from "@/components/Logo"
 import { Cottage } from "@/components/sanctuary/Cottage"
 import { Badge } from "@/components/ui/badge"
+import { BirdSays } from "@/components/ui/bird-says"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -64,12 +65,12 @@ export default function Today() {
         <h1>{greeting}</h1>
 
         {prompt && (
-          <div className="callout callout-accent mt-4" role="status">
-            <p className="text-ink-body">
+          <BirdSays className="mt-4">
+            <p>
               {prompt.message}
               {prompt.link && <> <Link href={prompt.link.href}>{prompt.link.label}</Link></>}
             </p>
-          </div>
+          </BirdSays>
         )}
 
         <section className="mt-8" aria-label="Your one thing today">

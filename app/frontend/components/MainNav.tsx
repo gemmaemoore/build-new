@@ -129,7 +129,7 @@ function BottomTabs({ items, onMore }: { items: NavItemDef[]; onMore: () => void
           </Link>
         )
       })}
-      <button type="button" onClick={onMore} className={cn(tab, "cursor-pointer text-ink-body")} aria-label="Open navigation">
+      <button type="button" onClick={onMore} className={cn(tab, "cursor-pointer text-ink-body")} aria-label="More: open navigation">
         <Menu className="h-5 w-5" />
         <span>More</span>
       </button>
