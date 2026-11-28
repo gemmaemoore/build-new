@@ -27,10 +27,26 @@ class BlitzController < ApplicationController
     if completion
       reward = completion.reward
       notice = reward&.awarded ? "Done! +#{reward.xp} XP, +#{reward.coins} coins." : "Done!"
+      surprise = Game::Surprise.after_win(user: Current.user, completion: completion) if reward&.awarded
+      notice = "#{notice} #{surprise.summary}" if surprise
       notice = "#{notice} #{boss_notice(completion.boss_results)}" if completion.boss_results.present?
       flash[:notice] = notice
     end
     redirect_to blitz_path(minutes: params[:minutes])
+  end
+
+  # Ends a sprint. Finishing at least a few chores inside the window pays a
+  # bonus per chore, once per sprint (keyed by its last completion).
+  def finish
+    minutes = OPTIONS.include?(params[:minutes].to_i) ? params[:minutes].to_i : 10
+    recent = Current.user.completions.active.where(completed_at: (minutes + 2).minutes.ago..).order(:completed_at).to_a
+    if recent.size >= Game::Economy.blitz_min_cleared
+      bonus = Game::Economy.blitz_bonus(recent.size)
+      award = Game::AwardOneOff.call(user: Current.user, kind: "blitz", reference: "blitz:#{recent.last.id}",
+                                     xp: bonus[:xp], coins: bonus[:coins])
+      flash[:notice] = "Blitz bonus! #{recent.size} chores cleared: +#{award.xp} XP and +#{award.coins} coins." if award.awarded
+    end
+    redirect_to blitz_path(minutes: minutes)
   end
 
   private

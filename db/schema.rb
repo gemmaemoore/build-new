@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_28_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_28_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -131,7 +131,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_28_110000) do
     t.string "reference"
     t.index ["completion_id", "kind"], name: "index_reward_transactions_once_per_completion", unique: true, where: "(completion_id IS NOT NULL)"
     t.index ["completion_id"], name: "index_reward_transactions_on_completion_id"
-    t.index ["user_id", "reference"], name: "index_reward_transactions_once_per_engagement_reward", unique: true, where: "((kind)::text = ANY ((ARRAY['todo'::character varying, 'boss_stage'::character varying, 'boss_defeat'::character varying, 'challenge'::character varying])::text[]))"
+    t.index ["user_id", "reference"], name: "index_reward_transactions_once_per_engagement_reward", unique: true, where: "((kind)::text = ANY ((ARRAY['todo'::character varying, 'boss_stage'::character varying, 'boss_defeat'::character varying, 'challenge'::character varying, 'surprise'::character varying, 'blitz'::character varying])::text[]))"
     t.index ["user_id", "reference"], name: "index_reward_transactions_once_per_one_off", unique: true, where: "((kind)::text = ANY ((ARRAY['start'::character varying, 'welcome'::character varying])::text[]))"
     t.index ["user_id", "reference"], name: "index_reward_transactions_once_per_purchase", unique: true, where: "((kind)::text = 'purchase'::text)"
     t.index ["user_id", "reference"], name: "index_reward_transactions_once_per_routine_day", unique: true, where: "((kind)::text = 'routine_bonus'::text)"

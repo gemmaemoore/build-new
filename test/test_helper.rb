@@ -13,6 +13,10 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
+    # Random surprises are off by default so reward totals are exact; the
+    # surprise tests switch them on and script the dice.
+    setup { Game::Catalog.surprises["win"]["chance"] = 0.0 }
+
     # Add more helper methods to be used by all tests here...
   end
 end

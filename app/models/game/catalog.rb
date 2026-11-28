@@ -49,6 +49,10 @@ module Game
         @challenges ||= load_yaml("challenges.yml")
       end
 
+      def surprises
+        @surprises ||= load_yaml("surprises.yml")
+      end
+
       def routine_templates
         @routine_templates ||= load_yaml("routine_templates.yml")
       end

@@ -18,7 +18,9 @@ Rails.application.routes.draw do
     end
   end
 
+  post "lucky_button", to: "lucky_buttons#create", as: :lucky_button
   get  "blitz", to: "blitz#show", as: :blitz
+  post "blitz/finish", to: "blitz#finish", as: :blitz_finish
   post "blitz/:id/complete", to: "blitz#complete", as: :blitz_complete
 
   get "quests",    to: "quests#index",      as: :quests

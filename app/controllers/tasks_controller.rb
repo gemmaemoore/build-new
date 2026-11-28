@@ -30,7 +30,10 @@ class TasksController < ApplicationController
 
   def complete
     completion = @task.complete!(today: Current.user.today)
-    flash[:victory] = victory_payload(completion, Achievements::Evaluator.call(Current.user)) if completion&.reward&.awarded
+    if completion&.reward&.awarded
+      surprise = Game::Surprise.after_win(user: Current.user, completion: completion)
+      flash[:victory] = victory_payload(completion, Achievements::Evaluator.call(Current.user), surprise)
+    end
     flash[:notice] = boss_notice(completion.boss_results) if completion&.boss_results.present?
     redirect_back fallback_location: quests_path
   end
@@ -85,8 +88,9 @@ class TasksController < ApplicationController
                     recurrence_weekdays: [])
     end
 
-    def victory_payload(completion, badges)
+    def victory_payload(completion, badges, surprise = nil)
       reward = completion.reward
+      progress = Current.user.progress.reload
       first = Current.user.completions.active.count == 1
       {
         id: completion.id,
@@ -97,10 +101,30 @@ class TasksController < ApplicationController
         message: Habits::Messages.victory(task: @task, completion: completion, first: first, leveled_up: reward.leveled_up?),
         xp: reward.xp,
         coins: reward.coins,
-        level: reward.to_level,
-        leveled_up: reward.leveled_up?,
-        badges: badges
+        level: progress.level,
+        leveled_up: reward.leveled_up? || !!surprise&.leveled_up?,
+        badges: badges,
+        surprise: surprise && { message: surprise.message, xp: surprise.xp, coins: surprise.coins,
+                                rare: surprise.rare, gift: surprise.gift },
+        xp_to_next: progress.xp_for_next_level - progress.xp_into_level,
+        wins_today: wins_today,
+        next_quest: next_quest
       }
+    end
+
+    def wins_today
+      zone = Current.user.zone
+      start = zone.local(Current.user.today.year, Current.user.today.month, Current.user.today.day)
+      Current.user.completions.active.where(completed_at: start...(start + 1.day)).count
+    end
+
+    # An easy follow-on: prefer the same room, shortest first, so one win can
+    # roll into the next. Nil when nothing else is ready.
+    def next_quest
+      ready = Current.user.tasks.available_on(Current.user.today).where.not(id: @task.id).order(:duration_minutes, :id)
+      task = ready.where(room: @task.room).first || ready.first
+      task && { id: task.id, title: task.title, minutes: task.duration_minutes, xp: task.xp,
+                monster_key: task.monster_key_or_default }
     end
 
     def redirect_back_with_errors(task)

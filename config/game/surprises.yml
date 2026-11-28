@@ -1,0 +1,21 @@
+# Happy surprises. After a finished quest there is a chance the bird finds
+# something; the amounts are random within a range. Nothing is ever lost or
+# locked behind these: they are pure bonus. All are written to the ledger once.
+#
+# win:   rolled after each completed quest (chance is the odds of any find)
+# daily: the once-a-day lucky button on the Today screen (always pays)
+win:
+  chance: 0.3
+  prizes:
+    - { key: lucky_button,  weight: 50, coins: [5, 12],  message: "The bird found a lucky button under the sofa!" }
+    - { key: shiny_coin,    weight: 20, coins: [10, 20], message: "A shiny coin was hiding behind the cushions!" }
+    - { key: sparkle,       weight: 18, xp: [8, 15],     message: "A sparkle of XP floats down from the ceiling!" }
+    - { key: golden_button, weight: 8,  coins: [25, 40], rare: true, message: "A GOLDEN button! The bird is thrilled!" }
+    - { key: cottage_gift,  weight: 4,  gift: true,      rare: true, message: "The bird found something special for your cottage!" }
+daily:
+  prizes:
+    - { key: lucky_button,  weight: 60, coins: [3, 10],  message: "Today's lucky button is a good one!" }
+    - { key: sparkle,       weight: 25, xp: [5, 12],     message: "Today's lucky button was full of sparkles!" }
+    - { key: golden_button, weight: 15, coins: [15, 30], rare: true, message: "Today's lucky button is GOLDEN!" }
+# Gifts are cosmetic decorations the player does not own yet, up to this price.
+gift_max_price: 60

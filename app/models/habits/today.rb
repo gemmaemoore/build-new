@@ -29,6 +29,7 @@ module Habits
         treat: @user.treat,
         challenges: Challenges::Current.call(@user),
         boss: active_boss,
+        lucky: lucky,
         todos: @user.todos.open.reminders_first.limit(3).map { |t| { id: t.id, title: t.title, remind_text: t.reminder_text(@today) } },
         todo_open_count: @user.todos.open.count,
         achievements: achievements,
@@ -45,6 +46,12 @@ module Habits
           energy: pick.energy,
           intention: pick.intention && { anchor: pick.intention.anchor }
         }
+      end
+
+      # The daily lucky button: closed, or what was found today.
+      def lucky
+        row = Game::Surprise.daily_row(@user)
+        { opened: row.present?, coins: row&.coin_delta, xp: row&.xp_delta }
       end
 
       def active_boss

@@ -18,7 +18,8 @@ module Onboarding
         Builder.call(user: user, draft: draft)
         user.owned_decorations.find_or_create_by!(decoration_key: GIFT)
         Sanctuary::Equip.call(user: user, key: GIFT)
-        Game::AwardOneOff.call(user: user, kind: "welcome", reference: "welcome", xp: Game::Economy.welcome_xp)
+        Game::AwardOneOff.call(user: user, kind: "welcome", reference: "welcome", xp: Game::Economy.welcome_xp,
+                                coins: Game::Economy.welcome_coins)
         user.update!(
           display_name: display_name.to_s.squish.first(40).presence,
           anchor: ANCHORS.include?(anchor) ? anchor : nil,

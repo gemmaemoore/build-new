@@ -153,4 +153,17 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     patch task_path(task), params: { assignee_id: theirs.id }
     assert_equal mine, task.reload.assignee
   end
+
+  test "the victory payload carries progress, the next easy win and any surprise" do
+    log_in_as(users(:one))
+    users(:one).tasks.destroy_all
+    first = users(:one).tasks.create!(title: "First", duration_minutes: 4)
+    users(:one).tasks.create!(title: "Next up", duration_minutes: 2)
+    post complete_task_path(first)
+    victory = flash[:victory]
+    assert_equal "Next up", victory[:next_quest][:title]
+    assert_equal 1, victory[:wins_today]
+    assert_operator victory[:xp_to_next], :>, 0
+    assert victory.key?(:surprise)
+  end
 end

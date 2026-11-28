@@ -22,6 +22,14 @@ routine_bonus_coins: 10
 # head start.
 start_xp: 3
 welcome_xp: 20
+# A little starter purse so the first cottage treat is only a couple of quests away.
+welcome_coins: 30
+
+# Tidy blitz: finishing at least `blitz_min_cleared` chores in one sprint pays a
+# bonus per chore on top of their normal rewards (once per sprint).
+blitz_min_cleared: 3
+blitz_xp_each: 5
+blitz_coins_each: 3
 
 # Quick to-dos pay a tiny reward, capped per day so they can't be farmed by
 # adding and ticking lots of throwaway items.

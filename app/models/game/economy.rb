@@ -43,6 +43,18 @@ module Game
         config.fetch("welcome_xp")
       end
 
+      def welcome_coins
+        config.fetch("welcome_coins")
+      end
+
+      def blitz_bonus(cleared)
+        { xp: cleared * config.fetch("blitz_xp_each"), coins: cleared * config.fetch("blitz_coins_each") }
+      end
+
+      def blitz_min_cleared
+        config.fetch("blitz_min_cleared")
+      end
+
       def routine_bonus
         { xp: config.fetch("routine_bonus_xp"), coins: config.fetch("routine_bonus_coins") }
       end

@@ -50,4 +50,23 @@ class BlitzControllerTest < ActionDispatch::IntegrationTest
     post blitz_complete_path(theirs)
     assert_response :not_found
   end
+
+  test "finishing a sprint with enough chores pays a bonus once" do
+    log_in_as(@user)
+    tasks = [ chore("A", 2), chore("B", 2), chore("C", 2) ]
+    tasks.each { |t| t.complete!(today: @user.today) }
+    assert_difference -> { RewardTransaction.where(kind: "blitz").count }, 1 do
+      post blitz_finish_path(minutes: 10)
+      post blitz_finish_path(minutes: 10)
+    end
+    assert_equal 15, RewardTransaction.find_by!(kind: "blitz").xp_delta
+  end
+
+  test "too few chores earns no bonus" do
+    log_in_as(@user)
+    chore("A", 2).complete!(today: @user.today)
+    assert_no_difference -> { RewardTransaction.where(kind: "blitz").count } do
+      post blitz_finish_path(minutes: 10)
+    end
+  end
 end
