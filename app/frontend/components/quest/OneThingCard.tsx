@@ -60,27 +60,30 @@ export function OneThingCard({
         </Button>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-end gap-3 border-t border-hairline pt-4">
-        <div className="space-y-1">
-          <label htmlFor="intention-anchor">When will you do it?</label>
-          <Select id="intention-anchor" value={anchor} onChange={(e) => setAnchor(e.target.value)}>
-            <option value="">Sometime today</option>
-            {anchors.map((a) => (
-              <option key={a} value={a}>{a.charAt(0).toUpperCase() + a.slice(1)}</option>
-            ))}
-          </Select>
+      <details className="mt-5 border-t border-hairline pt-4" open={planned}>
+        <summary className="cursor-pointer">{planned ? "Your plan" : "Plan when you'll do it (optional)"}</summary>
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <label htmlFor="intention-anchor">When will you do it?</label>
+            <Select id="intention-anchor" value={anchor} onChange={(e) => setAnchor(e.target.value)}>
+              <option value="">Sometime today</option>
+              {anchors.map((a) => (
+                <option key={a} value={a}>{a.charAt(0).toUpperCase() + a.slice(1)}</option>
+              ))}
+            </Select>
+          </div>
+          <Button
+            variant="secondary"
+            onClick={() => router.post("/intentions", { task_id: quest.id, anchor }, { preserveScroll: true })}
+          >
+            {planned ? "Update plan" : "Plan it"}
+          </Button>
         </div>
-        <Button
-          variant="secondary"
-          onClick={() => router.post("/intentions", { task_id: quest.id, anchor }, { preserveScroll: true })}
-        >
-          {planned ? "Update plan" : "Plan it"}
-        </Button>
-      </div>
+      </details>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <Button size="sm" variant="ghost" onClick={onSwap}>Swap for another</Button>
-        <Button size="sm" variant="ghost" onClick={onEasier}>Something easier</Button>
+        <Button size="sm" variant="ghost" onClick={onEasier}>Feeling stuck? Something tiny</Button>
         <Button
           size="sm"
           variant="ghost"

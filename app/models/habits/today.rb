@@ -30,6 +30,8 @@ module Habits
         challenges: Challenges::Current.call(@user),
         boss: active_boss,
         lucky: lucky,
+        combo: Combos.call(@user, today: @today),
+        done_today: done_today,
         todos: @user.todos.open.reminders_first.limit(3).map { |t| { id: t.id, title: t.title, remind_text: t.reminder_text(@today) } },
         todo_open_count: @user.todos.open.count,
         achievements: achievements,
@@ -46,6 +48,15 @@ module Habits
           energy: pick.energy,
           intention: pick.intention && { anchor: pick.intention.anchor }
         }
+      end
+
+      # What she has already done today: evidence of progress, kindly shown.
+      def done_today
+        zone = @user.zone
+        start = zone.local(@today.year, @today.month, @today.day)
+        rows = @user.completions.active.where(completed_at: start...(start + 1.day)).includes(:task).order(:completed_at).to_a
+        { count: rows.size, minutes: rows.sum { |c| c.task.duration_minutes },
+          items: rows.last(5).reverse.map { |c| c.task.title } }
       end
 
       # The daily lucky button: closed, or what was found today.

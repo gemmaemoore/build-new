@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from "@inertiajs/react"
 import { AppShell } from "@/components/AppShell"
 import { FocusMode } from "@/components/quest/FocusMode"
 import { OneThingCard } from "@/components/quest/OneThingCard"
+import { LogoMark } from "@/components/Logo"
 import { Cottage } from "@/components/sanctuary/Cottage"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,11 +34,14 @@ type TodayProps = {
   todo_open_count: number
   achievements: BadgeType[]
   sanctuary: SanctuaryData
+  lucky: { opened: boolean; coins: number | null; xp: number | null }
+  combo: { title: string; monster_key: string; task_ids: number[]; chores: string[]; minutes: number; bonus_xp: number; bonus_coins: number } | null
+  done_today: { count: number; minutes: number; items: string[] }
 }
 
 export default function Today() {
   const { props } = usePage<PageProps<TodayProps>>()
-  const { greeting, prompt, one_thing, week, today, identity, anchors, default_anchor, treat, achievements, sanctuary, todos, todo_open_count, boss, challenges } = props
+  const { greeting, prompt, one_thing, week, today, identity, anchors, default_anchor, treat, achievements, sanctuary, todos, todo_open_count, boss, challenges, lucky, combo, done_today } = props
   const [newTodo, setNewTodo] = useState("")
   const [excluded, setExcluded] = useState<number[]>([])
   const [focus, setFocus] = useState<FocusTarget | null>(null)
@@ -68,52 +72,6 @@ export default function Today() {
           </div>
         )}
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2" aria-label="Your progress">
-          <div className="flex items-center gap-4 rounded-2xl border border-hairline bg-surface p-4">
-            <ProgressRing
-              value={today.wins}
-              max={today.goal}
-              center={<>{Math.min(today.wins, today.goal)}/{today.goal}</>}
-              label="Today's wins"
-            />
-            <div>
-              <h2 className="heading-sm">Today's wins</h2>
-              <p className="caption">
-                {today.wins >= today.goal ? "Goal reached. Anything more is a bonus." : `${today.goal - today.wins} more for a great day.`}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 rounded-2xl border border-hairline bg-surface p-4">
-            <ProgressRing
-              value={week.active_days}
-              max={week.target}
-              center={<>{week.active_days}/{week.target}</>}
-              label="Days active this week"
-            />
-            <div>
-              <h2 className="heading-sm">This week</h2>
-              <ul className="mt-1 flex list-none gap-1 p-0" aria-label="Days this week">
-                {week.days.map((d) => (
-                  <li
-                    key={d.date}
-                    title={d.label}
-                    className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] ${
-                      d.active ? "border border-accent-strong bg-accent text-on-accent" : d.today ? "border border-accent-strong text-ink-body" : "border border-hairline text-ink-muted"
-                    }`}
-                  >
-                    <span aria-hidden="true">{d.label[0]}</span>
-                    <span className="sr-only">{d.label}: {d.active ? "active" : d.today ? "today" : "quiet"}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-1 caption">{week.met ? "Weekly goal met!" : `Aim for ${week.target} days. Any pace counts.`}</p>
-            </div>
-          </div>
-        </section>
-
-        <p className="mt-4 italic">{identity}</p>
-
         <section className="mt-8" aria-label="Your one thing today">
           <h2>Your one thing today</h2>
           <div className="mt-4">
@@ -142,16 +100,106 @@ export default function Today() {
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button asChild variant="secondary">
-              <Link href="/plan">Plan my day</Link>
-            </Button>
-            <Button asChild variant="secondary">
               <Link href="/blitz">Tidy blitz</Link>
             </Button>
+            <Button asChild variant="secondary">
+              <Link href="/plan">Plan my day</Link>
+            </Button>
             <Button asChild variant="ghost">
-              <Link href="/quests">Quest Board ({props.available_count})</Link>
+              <Link href="/quests">Today's list</Link>
             </Button>
           </div>
         </section>
+
+        <section className="mt-6 flex max-w-xl items-center gap-4 rounded-2xl border border-hairline bg-surface p-4" aria-label="Lucky button">
+          <LogoMark className="h-14 w-14 shrink-0" />
+          <div className="flex-1">
+            <h2 className="heading-sm">Today's lucky button</h2>
+            {lucky.opened ? (
+              <p className="caption">
+                The bird found {[lucky.coins ? `${lucky.coins} coins` : null, lucky.xp ? `${lucky.xp} XP` : null].filter(Boolean).join(" and ")} today. Come back tomorrow!
+              </p>
+            ) : (
+              <p className="caption">The bird found something shiny. Tap to see what!</p>
+            )}
+          </div>
+          {!lucky.opened && (
+            <Button size="sm" onClick={() => router.post("/lucky_button", {}, { preserveScroll: true })}>Open it</Button>
+          )}
+        </section>
+
+        {combo && (
+          <section className="mt-6 max-w-xl rounded-2xl border border-hairline bg-accent-faded p-4" aria-label="Stack it">
+            <h2 className="heading-sm">Stack it: {combo.title}</h2>
+            <p className="caption mt-1">
+              {combo.chores.length} quick chores, about {combo.minutes} minutes. Finish them all for up to +{combo.bonus_xp} XP and +{combo.bonus_coins} coins.
+            </p>
+            <ul className="mt-2 list-none p-0">
+              {combo.chores.map((c) => <li key={c} className="py-0.5">• {c}</li>)}
+            </ul>
+            <Button
+              className="mt-3"
+              size="sm"
+              onClick={() => router.post("/battles", { title: combo.title, monster_key: combo.monster_key, task_ids: combo.task_ids })}
+            >
+              Fight them as a boss battle
+            </Button>
+          </section>
+        )}
+
+        <section className="mt-8" aria-label="Your progress">
+          <h2 className="sr-only">Your progress</h2>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-2xl border border-hairline bg-surface p-4">
+            <div className="flex items-center gap-3">
+              <ProgressRing
+                size={64}
+                value={today.wins}
+                max={today.goal}
+                center={<>{Math.min(today.wins, today.goal)}/{today.goal}</>}
+                label="Today's wins"
+              />
+              <p>
+                <strong>Today's wins</strong>
+                <span className="block caption">
+                  {today.wins >= today.goal ? "Goal reached. Anything more is a bonus." : `${today.goal - today.wins} more for a great day.`}
+                </span>
+              </p>
+            </div>
+            <div className="flex-1">
+              <ul className="flex list-none gap-1 p-0" aria-label="Days this week">
+                {week.days.map((d) => (
+                  <li
+                    key={d.date}
+                    title={d.label}
+                    className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] ${
+                      d.active ? "border border-accent-strong bg-accent text-on-accent" : d.today ? "border border-accent-strong text-ink-body" : "border border-hairline text-ink-muted"
+                    }`}
+                  >
+                    <span aria-hidden="true">{d.label[0]}</span>
+                    <span className="sr-only">{d.label}: {d.active ? "active" : d.today ? "today" : "quiet"}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1 caption">{week.met ? "Weekly goal met!" : `${week.active_days} of ${week.target} days this week. Any pace counts.`}</p>
+            </div>
+          </div>
+          <p className="mt-3 italic">{identity}</p>
+        </section>
+
+        {done_today.count > 0 && (
+          <section className="mt-8" aria-label="Done today">
+            <h2>Done today</h2>
+            <p className="mt-1 caption">
+              {done_today.count} {done_today.count === 1 ? "thing" : "things"} · about {done_today.minutes} minutes. Look at that!
+            </p>
+            <ul className="mt-2 list-none p-0">
+              {done_today.items.map((title, i) => (
+                <li key={`${title}-${i}`} className="py-1">✓ {title}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+
 
         <section className="mt-10" aria-label="Challenges">
           <h2>Challenges</h2>
@@ -179,14 +227,17 @@ export default function Today() {
                   {c.claimed ? (
                     <Badge tone="accent">Claimed</Badge>
                   ) : (
-                    <Button
-                      size="sm"
-                      disabled={!c.complete}
-                      aria-label={`${c.complete ? "Claim reward" : "In progress"}: ${c.name}`}
-                      onClick={() => router.post(`/challenges/${c.period}/claim`, {}, { preserveScroll: true })}
-                    >
-                      {c.complete ? "Claim reward" : "In progress"}
-                    </Button>
+                    c.complete ? (
+                      <Button
+                        size="sm"
+                        aria-label={`Claim reward: ${c.name}`}
+                        onClick={() => router.post(`/challenges/${c.period}/claim`, {}, { preserveScroll: true })}
+                      >
+                        Claim reward
+                      </Button>
+                    ) : (
+                      <p className="caption">{c.target - c.current} to go</p>
+                    )
                   )}
                 </div>
               </li>
