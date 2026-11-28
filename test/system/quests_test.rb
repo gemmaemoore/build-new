@@ -55,6 +55,18 @@ class QuestsTest < ApplicationSystemTestCase
     assert_text "XP to level 2"
   end
 
+  test "a stuck task can be broken into tiny steps and ticked off" do
+    visit root_path
+    click_button "Start with 2 minutes"
+    within("[role=dialog]") do
+      js_click find_button("Stuck? Break it into tiny steps")
+      assert_selector "ul[aria-label='Tiny steps'] li", minimum: 4
+      assert_text "0 of"
+      js_click find("ul[aria-label='Tiny steps'] input[type=checkbox]", match: :first, visible: :all)
+      assert_text "1 of"
+    end
+  end
+
   test "plan my day is three separate steps ending in a plan with a buffer" do
     visit plan_path
     assert_text "How much time do you have?"

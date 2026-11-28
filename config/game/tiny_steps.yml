@@ -1,0 +1,46 @@
+# "Break it into tiny steps": short, concrete steps for a stuck task. No AI
+# needed; chosen by the task's room. Each list is the middle of the sequence,
+# wrapped by the opening and closing lines.
+opening: Put a song on, or start the 2-minute timer
+closing: Put the supplies away. That's it, you're done!
+default:
+  - Gather everything you need in one spot
+  - Do just the very first part
+  - Do the next small part
+rooms:
+  kitchen:
+    - Put anything that doesn't belong back where it lives
+    - Clear one surface completely
+    - Do the main job on that one surface
+  bathroom:
+    - Take out anything that doesn't belong
+    - Spray or fill what needs it, then leave it a minute
+    - Wipe it down, top to bottom
+  bedroom:
+    - Pick up the clothes and sort them (wash, hang, put away)
+    - Clear the top of one surface
+    - Do the main job
+  living_room:
+    - Collect cups, plates and rubbish
+    - Put toys and things back in their homes
+    - Do the main job
+  dining_room:
+    - Clear the table
+    - Wipe it over
+    - Do the main job
+  kids_room:
+    - Fill one basket with toys
+    - Put clothes in the wash pile
+    - Do the main job
+  laundry:
+    - Gather what you need into one pile
+    - Start the machine or sort the load
+    - Set a reminder for when it's done
+  utility:
+    - Gather what you need into one pile
+    - Start the machine or sort the load
+    - Set a reminder for when it's done
+  garden:
+    - Grab gloves and a bag
+    - Tackle the nearest patch
+    - Tidy the tools away

@@ -166,4 +166,15 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_operator victory[:xp_to_next], :>, 0
     assert victory.key?(:surprise)
   end
+
+  test "tiny steps come back as JSON, only for my own tasks" do
+    log_in_as(users(:one))
+    mine = users(:one).tasks.create!(title: "Wipe sides", room: "kitchen")
+    get tiny_steps_task_path(mine)
+    assert_response :success
+    assert_operator JSON.parse(response.body)["steps"].size, :>=, 4
+
+    get tiny_steps_task_path(users(:two).tasks.create!(title: "Theirs"))
+    assert_response :not_found
+  end
 end

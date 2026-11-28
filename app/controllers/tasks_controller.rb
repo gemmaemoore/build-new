@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class TasksController < ApplicationController
-  before_action :set_task, only: %i[update destroy complete uncomplete skip defer start]
+  before_action :set_task, only: %i[update destroy complete uncomplete skip defer start tiny_steps]
 
   def create
     task = Current.user.tasks.build(task_params)
@@ -47,6 +47,11 @@ class TasksController < ApplicationController
     result = Game::AwardOneOff.call(user: user, kind: "start", reference: "#{@task.id}:#{user.today.iso8601}",
                                     xp: Game::Economy.start_xp)
     render json: { awarded: result.awarded, xp: result.xp }
+  end
+
+  # Called with a raw fetch() from the focus timer, so JSON is right here.
+  def tiny_steps
+    render json: { steps: Quests::TinySteps.call(@task) }
   end
 
   def uncomplete

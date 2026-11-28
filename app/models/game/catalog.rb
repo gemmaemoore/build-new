@@ -49,6 +49,10 @@ module Game
         @challenges ||= load_yaml("challenges.yml")
       end
 
+      def tiny_steps
+        @tiny_steps ||= load_yaml("tiny_steps.yml")
+      end
+
       def surprises
         @surprises ||= load_yaml("surprises.yml")
       end

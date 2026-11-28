@@ -1,6 +1,7 @@
 import * as React from "react"
 import { router } from "@inertiajs/react"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { MonsterArt } from "@/components/ui/monster-art"
 import {
   Dialog,
@@ -46,6 +47,20 @@ export function FocusMode({
     router.post(path, {}, { preserveScroll: true, onSuccess })
 
   const [started, setStarted] = React.useState<number | null>(null)
+  const [steps, setSteps] = React.useState<string[]>(target.steps)
+  const [ticked, setTicked] = React.useState<number[]>([])
+  const [loadingSteps, setLoadingSteps] = React.useState(false)
+
+  // "Break it into tiny steps": a short checklist for a stuck task.
+  const loadSteps = () => {
+    setLoadingSteps(true)
+    fetch(`/tasks/${target.task_id}/tiny_steps`, { headers: { Accept: "application/json" }, credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => data?.steps && setSteps(data.steps))
+      .catch(() => undefined)
+      .finally(() => setLoadingSteps(false))
+  }
+  const toggleStep = (i: number) => setTicked((t) => (t.includes(i) ? t.filter((x) => x !== i) : [...t, i]))
 
   const begin = (next: Mode) => {
     setMode(next)
@@ -82,12 +97,26 @@ export function FocusMode({
           </div>
         </DialogHeader>
 
-        {target.steps.length > 0 && (
-          <ol className="list-decimal space-y-1 pl-5">
-            {target.steps.map((step) => (
-              <li key={step} className="pl-1">{step}</li>
-            ))}
-          </ol>
+        {steps.length > 0 ? (
+          <div>
+            <ul className="list-none space-y-2 p-0" aria-label="Tiny steps">
+              {steps.map((step, i) => (
+                <li key={step}>
+                  <label className="flex items-start gap-3 font-normal text-ink-body">
+                    <Checkbox className="mt-1" checked={ticked.includes(i)} onChange={() => toggleStep(i)} />
+                    <span className={ticked.includes(i) ? "line-through text-ink-muted" : ""}>{step}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 caption" aria-live="polite">
+              {ticked.length === steps.length ? "Every step done! Press Done! when you're ready." : `${ticked.length} of ${steps.length} steps. Tiny steps count.`}
+            </p>
+          </div>
+        ) : (
+          <Button size="sm" variant="ghost" disabled={loadingSteps} onClick={loadSteps}>
+            Stuck? Break it into tiny steps
+          </Button>
         )}
 
         {treat && <p className="mt-3 caption">Pair it with a treat: {treat}.</p>}
