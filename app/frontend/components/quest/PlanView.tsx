@@ -23,7 +23,7 @@ export function PlanView({ plan, onStart }: { plan: QuestPlan; onStart: (target:
                 <MonsterArt monster={q.monster_key} className="h-14 w-14" />
                 <div>
                   <h3>{q.real_task}</h3>
-                  <p className="caption mt-1">Step {i + 1} · {q.monster}: {q.quest_title}</p>
+                  <p className="caption mt-1">Step {i + 1} · {q.quest_title}</p>
                 </div>
               </div>
               {q.steps.length > 0 && (

@@ -31,7 +31,7 @@ export function ProgressRing({ value, max, center, label, size = 96, className, 
       {...props}
     >
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" aria-hidden="true">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" strokeWidth={stroke} className="stroke-hairline" />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" strokeWidth={stroke} className="stroke-accent-faded" />
         <circle
           cx={size / 2}
           cy={size / 2}

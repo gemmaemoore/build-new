@@ -1,5 +1,5 @@
 import * as React from "react"
-import { usePage } from "@inertiajs/react"
+import { router, usePage } from "@inertiajs/react"
 import {
   Dialog,
   DialogContent,
@@ -114,6 +114,18 @@ export function VictoryDialog() {
               </Button>
             </div>
           )}
+          <p className="mt-3">
+            <button
+              type="button"
+              className="cursor-pointer underline"
+              onClick={() => {
+                setShownId(victory.id)
+                router.post(`/tasks/${victory.task_id}/uncomplete`, {}, { preserveScroll: true })
+              }}
+            >
+              Oops, undo that
+            </button>
+          </p>
           <DialogFooter>
             <Button variant={victory.next_quest ? "secondary" : "primary"} onClick={() => setShownId(victory.id)}>
               {victory.next_quest ? "That's enough for now" : "Lovely"}

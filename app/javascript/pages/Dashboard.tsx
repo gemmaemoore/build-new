@@ -128,6 +128,14 @@ export default function Today() {
           )}
         </section>
 
+        {sanctuary.teaser && (
+          <p className="mt-4 max-w-xl">
+            🏡 Next cottage treat: <strong>{sanctuary.teaser.name}</strong>
+            {sanctuary.teaser.coins_needed > 0 ? ` (${sanctuary.teaser.coins_needed} coins to go). ` : ". You can buy it now! "}
+            <Link href="/sanctuary">Visit the cottage</Link>
+          </p>
+        )}
+
         {combo && (
           <section className="mt-6 max-w-xl rounded-2xl border border-hairline bg-accent-faded p-4" aria-label="Stack it">
             <h2 className="heading-sm">Stack it: {combo.title}</h2>

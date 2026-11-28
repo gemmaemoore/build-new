@@ -152,6 +152,7 @@ export type Badge = { key: string; name: string; description: string }
 
 export type Victory = {
   id: number
+  task_id: number
   monster: string
   monster_key: string | null
   message: string

@@ -2,6 +2,7 @@ import * as React from "react"
 import { Head, Link, router, usePage } from "@inertiajs/react"
 import { AppShell } from "@/components/AppShell"
 import { PageHeader } from "@/components/PageHeader"
+import { Confetti } from "@/components/quest/Confetti"
 import { MusicPanel, type Playlist } from "@/components/MusicPanel"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -16,17 +17,19 @@ const clock = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`
 
 export default function Blitz() {
-  const { props } = usePage<PageProps<{ minutes: number; options: number[]; queue: Quest[]; treat: string | null; playlists: Playlist[] }>>()
-  const { minutes, options, queue, treat, playlists } = props
+  const { props } = usePage<PageProps<{ minutes: number; options: number[]; queue: Quest[]; treat: string | null; playlists: Playlist[]; bonus: { min: number; xp: number; coins: number } }>>()
+  const { minutes, options, queue, treat, playlists, bonus } = props
   const total = minutes * 60
   const [left, setLeft] = React.useState(total)
   const [running, setRunning] = React.useState(false)
   const [cleared, setCleared] = React.useState(0)
+  const [ended, setEnded] = React.useState(false)
 
   React.useEffect(() => {
     setLeft(total)
     setRunning(false)
     setCleared(0)
+    setEnded(false)
   }, [total])
 
   React.useEffect(() => {
@@ -35,7 +38,13 @@ export default function Blitz() {
     return () => window.clearInterval(id)
   }, [running])
 
-  const finished = left === 0
+  const finished = left === 0 || ended
+
+  // Time up (or finishing early): claim the sprint bonus once.
+  React.useEffect(() => {
+    if (!finished || cleared < bonus.min) return
+    router.post("/blitz/finish", { minutes }, { preserveScroll: true })
+  }, [finished])
   const started = running || left < total
   const done = (q: Quest) => {
     setCleared((n) => n + 1)
@@ -60,17 +69,23 @@ export default function Blitz() {
           ))}
         </div>
 
-        <section className="mt-6 flex flex-wrap items-center gap-4 rounded-2xl border border-hairline bg-surface p-5" aria-label="Timer">
+        <section className="relative mt-6 flex flex-wrap items-center gap-4 rounded-2xl border border-hairline bg-surface p-5" aria-label="Timer">
+          {finished && cleared > 0 && <Confetti />}
           <p role="timer" aria-label="Time left" className="timer-readout"><strong>{clock(left)}</strong></p>
           {!finished && (
             <Button onClick={() => setRunning((r) => !r)}>{running ? "Pause" : started ? "Resume" : "Start the blitz"}</Button>
           )}
+          {!finished && cleared > 0 && (
+            <Button variant="secondary" onClick={() => { setRunning(false); setEnded(true) }}>Finish now</Button>
+          )}
           <p aria-live="polite">
-            {cleared > 0 ? `${cleared} ${cleared === 1 ? "chore" : "chores"} cleared` : "Press start, then tick chores off as you go."}
+            {cleared > 0
+              ? `${cleared} ${cleared === 1 ? "chore" : "chores"} cleared${cleared >= bonus.min ? ". Bonus unlocked!" : `. ${bonus.min - cleared} more for a bonus.`}`
+              : `Clear ${bonus.min} or more for a bonus: +${bonus.xp} XP and +${bonus.coins} coins for every chore.`}
           </p>
           {finished && (
             <p role="status">
-              <strong>Time!</strong> {cleared > 0 ? `You cleared ${cleared} ${cleared === 1 ? "chore" : "chores"}.` : "Nothing cleared, and that's fine."}
+              <strong>{left === 0 ? "Time!" : "Nicely done!"}</strong> {cleared > 0 ? `You cleared ${cleared} ${cleared === 1 ? "chore" : "chores"}.` : "Nothing cleared, and that's fine."}
               {treat ? ` Time for your treat: ${treat}.` : ""}
             </p>
           )}

@@ -41,8 +41,8 @@ const QuestCard = React.forwardRef<HTMLElement, QuestCardProps>(
         {monsterKey && <MonsterArt monster={monsterKey} className="h-14 w-14" />}
         <div>
           <h3>{title}</h3>
-          <p className="caption mt-1">
-            {monsterName}: {fantasyTitle}
+          <p className="caption mt-1" title={monsterName}>
+            {fantasyTitle}
           </p>
         </div>
       </div>

@@ -14,6 +14,7 @@ class BlitzController < ApplicationController
       options: OPTIONS,
       queue: line_up(minutes, today).map { |t| TaskPresenter.new(t, today: today).as_json },
       treat: Current.user.treat,
+      bonus: { min: Game::Economy.blitz_min_cleared, **Game::Economy.blitz_bonus(1) },
       playlists: Game::Catalog.playlists.map { |p| p.slice("key", "label", "blurb", "spotify_id").symbolize_keys }
     }
   end

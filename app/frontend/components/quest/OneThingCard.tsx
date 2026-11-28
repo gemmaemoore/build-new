@@ -36,7 +36,7 @@ export function OneThingCard({
         <div>
           <h3>{quest.title}</h3>
           <p className="caption mt-1">
-            {quest.monster.name}: {quest.fantasy_title}
+            {quest.fantasy_title}
           </p>
         </div>
       </div>

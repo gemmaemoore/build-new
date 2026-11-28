@@ -9,6 +9,8 @@ import type { PageProps } from "@/types/inertia"
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { props } = usePage<PageProps>()
   const player = props.player
+  const [dismissed, setDismissed] = React.useState<string | null>(null)
+  const notice = props.flash?.notice ?? null
   const reducedMotion = props.current_user?.reduced_motion ?? false
 
   // The server renders this class on full page loads; keep it in sync after
@@ -26,12 +28,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         Skip to content
       </a>
       <MainNav />
-      <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-6 pb-8 pt-16 focus:outline-none sm:px-10 lg:pt-8">
+      <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-6 pb-28 pt-6 focus:outline-none sm:px-10 lg:pb-8 lg:pt-8">
         <div className="mx-auto max-w-4xl">
-          {props.flash?.notice && (
-            <p className="mb-4 rounded-lg bg-accent-faded px-4 py-2 text-sm text-accent-display" role="status">
-              {props.flash.notice}
-            </p>
+          {notice && dismissed !== notice && (
+            <div className="mb-4 flex items-start gap-3 rounded-lg bg-accent-faded px-4 py-2 text-sm text-accent-display" role="status">
+              <p className="flex-1">{notice}</p>
+              <button type="button" className="cursor-pointer underline" onClick={() => setDismissed(notice)}>
+                Dismiss
+              </button>
+            </div>
           )}
           {props.flash?.alert && (
             <p className="mb-4 rounded-lg bg-danger-faded px-4 py-2 text-sm text-danger-display" role="alert">

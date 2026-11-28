@@ -94,6 +94,7 @@ class TasksController < ApplicationController
       first = Current.user.completions.active.count == 1
       {
         id: completion.id,
+        task_id: @task.id,
         monster: Game::Catalog.monster(@task.monster_key_or_default)["name"],
         monster_key: @task.monster_key_or_default,
         quest_title: @task.fantasy_title_or_default,

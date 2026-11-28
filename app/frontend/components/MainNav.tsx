@@ -12,6 +12,7 @@ import {
   ListTodo,
   LogOut,
   Menu,
+  Zap,
   Repeat,
   Swords,
   Settings,
@@ -98,6 +99,44 @@ const DEFAULT_NAV_ITEMS: NavItemDef[] = [
   },
 ]
 
+// The four things she reaches for most, within thumb reach on a phone.
+const TAB_ITEMS: NavItemDef[] = [
+  { href: "/", icon: Home, label: "Today", match: (url) => url === "/" || url.startsWith("/?") || url.startsWith("/dashboard") },
+  { href: "/quests", icon: ListChecks, label: "Quests", match: (url) => url.startsWith("/quests") },
+  { href: "/blitz", icon: Zap, label: "Blitz", match: (url) => url.startsWith("/blitz") },
+  { href: "/sanctuary", icon: Cottage, label: "Cottage", match: (url) => url.startsWith("/sanctuary") },
+]
+
+function BottomTabs({ items, onMore }: { items: NavItemDef[]; onMore: () => void }) {
+  const { url } = usePage()
+  const tab = "flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-xs no-underline"
+  return (
+    <nav
+      aria-label="Quick navigation"
+      className="fixed inset-x-0 bottom-0 z-30 flex border-t border-hairline bg-page pb-[env(safe-area-inset-bottom)] lg:hidden"
+    >
+      {items.map((item) => {
+        const active = item.match(url)
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            className={cn(tab, active ? "text-accent-display" : "text-ink-body")}
+          >
+            <item.icon className="h-5 w-5" />
+            <span>{item.label}</span>
+          </Link>
+        )
+      })}
+      <button type="button" onClick={onMore} className={cn(tab, "cursor-pointer text-ink-body")} aria-label="Open navigation">
+        <Menu className="h-5 w-5" />
+        <span>More</span>
+      </button>
+    </nav>
+  )
+}
+
 function useMainNavOpen() {
   const [open, setOpen] = React.useState<boolean>(true)
   React.useEffect(() => {
@@ -167,14 +206,7 @@ export function MainNav({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => setMobileOpen(true)}
-        className="fixed right-3 top-3 z-30 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-md border border-hairline bg-page text-ink-body hover:bg-surface lg:hidden"
-        aria-label="Open navigation"
-      >
-        <Menu className="h-4 w-4" />
-      </button>
+      <BottomTabs items={TAB_ITEMS} onMore={() => setMobileOpen(true)} />
     </>
   )
 }
