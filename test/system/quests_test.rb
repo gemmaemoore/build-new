@@ -67,6 +67,19 @@ class QuestsTest < ApplicationSystemTestCase
     end
   end
 
+  test "a stuck one-off can be turned into tiny quests stacked as a boss battle" do
+    users(:one).tasks.destroy_all
+    users(:one).tasks.create!(title: "Sort the post", room: "office")
+    visit root_path
+    click_button "Start with 2 minutes"
+    within("[role=dialog]") do
+      js_click find_button("Stuck? Break it into tiny steps")
+      js_click find_button("Turn these into tiny quests")
+    end
+    assert_text "Tackle: Sort the post"
+    assert_text "Sort the post: Gather everything you need in one spot"
+  end
+
   test "plan my day is three separate steps ending in a plan with a buffer" do
     visit plan_path
     assert_text "How much time do you have?"

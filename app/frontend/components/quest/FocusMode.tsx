@@ -109,6 +109,16 @@ export function FocusMode({
                 </li>
               ))}
             </ul>
+            {target.splittable && (
+              <Button
+                className="mt-2"
+                size="sm"
+                variant="secondary"
+                onClick={() => router.post(`/tasks/${target.task_id}/split`)}
+              >
+                Turn these into tiny quests
+              </Button>
+            )}
             <p className="mt-2 caption" aria-live="polite">
               {ticked.length === steps.length ? "Every step done! Press Done! when you're ready." : `${ticked.length} of ${steps.length} steps. Tiny steps count.`}
             </p>

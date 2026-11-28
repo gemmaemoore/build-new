@@ -177,4 +177,19 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     get tiny_steps_task_path(users(:two).tasks.create!(title: "Theirs"))
     assert_response :not_found
   end
+
+  test "splitting redirects to the new boss battle; repeating chores are refused" do
+    log_in_as(users(:one))
+    one_off = users(:one).tasks.create!(title: "Declutter the desk", room: "office")
+    post split_task_path(one_off)
+    assert_redirected_to boss_battle_path(users(:one).boss_battles.order(:id).last)
+
+    daily = users(:one).tasks.create!(title: "Wipe sides", recurrence_kind: "completion", recurrence_interval_days: 1)
+    post split_task_path(daily)
+    assert_match "can't be split", flash[:alert]
+    assert Task.exists?(daily.id)
+
+    post split_task_path(users(:two).tasks.create!(title: "Theirs"))
+    assert_response :not_found
+  end
 end

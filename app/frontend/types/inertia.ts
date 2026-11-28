@@ -73,6 +73,8 @@ export type FocusTarget = {
   quest_title: string
   minutes: number
   steps: string[]
+  /** One-off quests can be split into tiny quests; repeating chores cannot. */
+  splittable?: boolean
 }
 
 export type Decoration = {

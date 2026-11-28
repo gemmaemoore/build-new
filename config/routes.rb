@@ -18,6 +18,7 @@ Rails.application.routes.draw do
       post :skip
       post :start
       get :tiny_steps
+      post :split
       post :defer
     end
   end

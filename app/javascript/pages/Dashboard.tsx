@@ -52,7 +52,7 @@ export default function Today() {
     router.get("/", data, { preserveScroll: true, preserveState: true })
 
   const startFocus = (q: Quest) =>
-    setFocus({ task_id: q.id, monster_key: q.monster.key, title: q.title, quest_title: q.fantasy_title, minutes: q.duration_minutes, steps: [] })
+    setFocus({ task_id: q.id, monster_key: q.monster.key, title: q.title, quest_title: q.fantasy_title, minutes: q.duration_minutes, steps: [], splittable: q.recurrence_kind === "none" })
 
   return (
     <>

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class TasksController < ApplicationController
-  before_action :set_task, only: %i[update destroy complete uncomplete skip defer start tiny_steps]
+  before_action :set_task, only: %i[update destroy complete uncomplete skip defer start tiny_steps split]
 
   def create
     task = Current.user.tasks.build(task_params)
@@ -52,6 +52,16 @@ class TasksController < ApplicationController
   # Called with a raw fetch() from the focus timer, so JSON is right here.
   def tiny_steps
     render json: { steps: Quests::TinySteps.call(@task) }
+  end
+
+  # Replaces a stuck one-off with a few tiny quests stacked as a boss battle.
+  def split
+    result = Tasks::Split.call(@task)
+    if result
+      redirect_to boss_battle_path(result.battle), notice: "Split into #{result.tasks.size} tiny quests, stacked as a boss battle. One small piece at a time."
+    else
+      redirect_back fallback_location: quests_path, alert: "That one can't be split (repeating chores and quests in a battle stay as they are)."
+    end
   end
 
   def uncomplete
